@@ -1,0 +1,4 @@
+*.DS_Store
+*.drawio
+data/raw/*.csv
+data/processed/full_edgelist.tsv
