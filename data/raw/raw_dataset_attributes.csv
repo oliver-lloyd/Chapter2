@@ -1,0 +1,6 @@
+Count,Expected,Actual,Diff
+Drug nodes,645,645,0
+Protein nodes,19085,19089,4
+PPI edges,715612,715612,0
+Polypharmic side effect edges,4651131,4649441,-1690
+Drug-target edges,18596,18690,94
