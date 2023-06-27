@@ -1,11 +1,7 @@
 import pandas as pd
-import argparse
 
-# Get user args
-parser = argparse.ArgumentParser()
-parser.add_argument('edgelist')
-args = parser.parse_args()
-edges = pd.read_csv(args.edgelist, header=None, sep='\t', dtype={0:str, 1:str, 2:str})
+filename = 'full_edgelist_multidrugs.tsv'
+edges = pd.read_csv(filename, header=None, sep='\t', dtype={0:str, 1:str, 2:str})
 edges.columns=['head', 'relation', 'tail']
 
 # Edge counts
@@ -40,6 +36,6 @@ for count_name in edge_counts:
 
 # Write to disk
 edgelist_name = args.edgelist.split('/')[-1][:-4]
-file_name = f'stats_{edgelist_name}.csv'
-out_df.to_csv(file_name, index=False)
+out_name = f'stats_{file_name[:-4]}.csv'
+out_df.to_csv(out_name, index=False)
    

@@ -4,32 +4,24 @@ import multiprocessing as mp
 # Create storage dataframe
 out_edges = pd.DataFrame(columns=['head', 'relation', 'tail'])
 
-# Add PPI edges
-ppi = pd.read_csv('../raw/bio-decagon-ppi.csv')
-ppi['relation'] = 'ProteinProteinInteraction'
-ppi.columns = ['head', 'tail', 'relation']
-out_edges = ppi[['head', 'relation', 'tail']]
-del ppi
-
-# Add drug-target edges
-drug_target = pd.read_csv('../raw/bio-decagon-targets.csv')
-drug_target['relation'] = 'DrugTarget'
-drug_target.columns = ['head', 'tail', 'relation']
-out_edges = out_edges.append(drug_target, ignore_index=True)
-del drug_target
+# Load core network
+core = pd.read_csv('../../processed/core_network_ppi_drugtarget.tsv', header=None, sep='\t', dtype={0:str, 1:str, 2:str})
+core.columns = ['head', 'relation', 'tail']
+out_edges = out_edges.append(core)
+del core
 
 # Add monopharmic side effect edges
-monoSE = pd.read_csv('../raw/bio-decagon-mono.csv').drop(columns=['Side Effect Name'])
-monoSE['relation'] = 'MonopharmacySE'
-monoSE.columns = ['head', 'tail', 'relation']
+monoSE = pd.read_csv('../../processed/monopharmacy_edges.tsv', header=None, sep='\t')
+monoSE.columns = ['head', 'relation', 'tail']
 out_edges = out_edges.append(monoSE, ignore_index=True)
 del monoSE
 
 # Add Polypharmic side effect edges
-polySE = pd.read_csv('../raw/bio-decagon-combo.csv', nrows=10000).drop(columns=['Side Effect Name'])
+polySE = pd.read_csv('../../processed/polypharmacy_edges.tsv', header=None, sep='\t')
+polySE.columns = ['head', 'relation', 'tail']
 
 def create_multidrug(df):
-    df['head'] = [f'{row["STITCH 1"]}-{row["STITCH 2"]}' for i, row in df.iterrows()]
+    df['head'] = [f'{row["head"]}-{row["tail"]}' for i, row in df.iterrows()]
     return df
 
 n_cpu = mp.cpu_count()
@@ -43,9 +35,8 @@ del chunks
 
 multidrug_set = set()
 for chunk in new_chunks:
-    chunk = chunk.drop(columns=['STITCH 1', 'STITCH 2'])
-    chunk['relation'] = 'PolypharmacySE'
-    chunk.columns = ['tail', 'head', 'relation']
+    chunk['tail'] = chunk['relation']
+    chunk['relation'] = 'PolypharmacySideEffect'
     for multidrug in chunk['head'].unique():
         multidrug_set.add(multidrug)
     out_edges = out_edges.append(chunk, ignore_index=True)

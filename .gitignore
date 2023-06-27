@@ -1,4 +1,4 @@
 *.DS_Store
 data/raw/bio*.csv
-data/processed/full_edgelist_selfloops.tsv
-data/processed/full_edgelist_multidrugs.tsv
+data/processed/*.tsv
+data/graphs/*/full*.tsv
