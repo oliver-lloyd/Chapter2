@@ -55,7 +55,7 @@ del new_chunks
 def multidrug_comprises(multidrug):
     out = []
     for drug in multidrug.split('-'):
-        out.append([multidrug, 'Contains', drug])
+        out.append([multidrug, 'MultidrugContains', drug])
     return out 
 
 with mp.Pool(n_cpu) as pool:
