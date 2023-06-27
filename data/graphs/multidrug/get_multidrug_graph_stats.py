@@ -1,7 +1,7 @@
 import pandas as pd
 
-filename = 'full_edgelist_multidrugs.tsv'
-edges = pd.read_csv(filename, header=None, sep='\t', dtype={0:str, 1:str, 2:str})
+file_name = 'full_edgelist_multidrugs.tsv'
+edges = pd.read_csv(file_name, header=None, sep='\t', dtype={0:str, 1:str, 2:str})
 edges.columns=['head', 'relation', 'tail']
 
 # Edge counts
@@ -35,7 +35,6 @@ for count_name in edge_counts:
     out_df.loc[len(out_df)] = ['edge', count_name, edge_counts[count_name]]
 
 # Write to disk
-edgelist_name = args.edgelist.split('/')[-1][:-4]
-out_name = f'stats_{file_name[:-4]}.csv'
+edgelist_name = file_name[:-4]
+out_name = f'stats_{edgelist_name}.csv'
 out_df.to_csv(out_name, index=False)
-   

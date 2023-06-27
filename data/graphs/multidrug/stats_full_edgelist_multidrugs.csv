@@ -1,0 +1,12 @@
+type,name,count
+node,Total,94353
+node,Proteins,19089
+node,Side effects,11147
+node,Multidrugs,63472
+node,Drugs,645
+edge,Total,5612510
+edge,ProteinProteinInteraction,715612
+edge,DrugTarget,18690
+edge,MonopharmacySideEffect,174977
+edge,PolypharmacySideEffect,4576287
+edge,MultidrugContains,126944
