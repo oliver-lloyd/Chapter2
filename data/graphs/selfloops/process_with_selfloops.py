@@ -19,7 +19,7 @@ del monoSE
 
 # Add Polypharmic side effect edges
 polySE = pd.read_csv('../../processed/polypharmacy_edges.tsv', header=None, sep='\t')
-polySE.columns = ['head', 'tail', 'relation']
+polySE.columns = ['head', 'relation', 'tail']
 out_edges = out_edges.append(polySE, ignore_index=True)
 del polySE
 
