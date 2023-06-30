@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import torch
 from sklearn.decomposition import PCA
 
 # Load data
@@ -19,4 +20,4 @@ for drug, sub_df in edges.groupby('drug'):
 for n_dim in [32, 64, 128, 256]:
     pca = PCA(n_components=n_dim)
     new_matrix = pca.fit_transform(full_features)
-    np.savez_compressed(f'{n_dim}dim.npy', new_matrix)
+    torch.save(torch.tensor(new_matrix), f'{n_dim}dim.pt')
