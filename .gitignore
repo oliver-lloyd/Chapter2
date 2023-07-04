@@ -3,3 +3,5 @@ data/raw/bio*.csv
 data/processed/*.tsv
 data/graphs/*/full*.tsv
 data/graphs/non-naive/feature_vectors/full_features.csv
+analysis/experiments/test/*/202*
+analysis/experiments/test/*/slurm*
