@@ -1,8 +1,15 @@
 import pandas as pd
+import argparse
 import multiprocessing as mp
 
+# Get specified target file
+parser = argparse.ArgumentParser()
+parser.add_argument('edgelist_tsv')
+parser.add_argument('--output_dir')
+args = parser.parse_args()
+
 # Load data
-file_name = 'full_edgelist_selfloops.tsv'
+file_name = args.edgelist_tsv
 edges = pd.read_csv(file_name, header=None, sep='\t', dtype={0:str, 1:str, 2:str})
 edges.columns=['head', 'relation', 'tail']
 
@@ -41,4 +48,6 @@ for count_name in edge_counts:
 # Write to disk
 edgelist_name = file_name[:-4]
 out_name = f'stats_{edgelist_name}.csv'
+if args.output_dir:
+    out_name = f'{args.output_dir}/{out_name}'
 out_df.to_csv(out_name, index=False)
