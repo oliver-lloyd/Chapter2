@@ -1,12 +1,12 @@
 ax_search:
-  num_sobol_trials: 100
+  num_sobol_trials: 50
   num_trials: 100
   parameters:
   - {name: model, type: fixed, value: relational_tucker3}
   - is_ordered: true
     name: train.batch_size
     type: choice
-    values: [128, 256, 512, 1024]
+    values: [128, 256, 512]
   - name: train.type
     type: choice
     values: [1vsAll, KvsAll, negative_sampling]
@@ -32,7 +32,7 @@ ax_search:
   - is_ordered: true
     name: lookup_embedder.dim
     type: choice
-    values: [16, 32, 64, 128, 256, 512]
+    values: [32, 64, 128, 256, 512]
   - name: lookup_embedder.initialize
     type: choice
     values: [xavier_normal_, xavier_uniform_, normal_, uniform_]
@@ -68,7 +68,7 @@ eval: {batch_size: 256, metrics_per.relation_type: true}
 import: [relational_tucker3]
 job.type: search
 negative_sampling.implementation: sp_po
-search.num_workers: 16
+search.num_workers: 1
 search.on_error: continue
 search.type: ax
 train: {auto_correct: true, max_epochs: 500}
