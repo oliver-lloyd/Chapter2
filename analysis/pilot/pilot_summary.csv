@@ -1,0 +1,10 @@
+Model,Data,Job,No. trials attempted in 72h time limit,No. completed trials,No. trials errored out immediately,Best MRR,Notes
+Conve,Selfloops,5656959 (rerun 5665772),19/32,13/19,6,0.14,Had to resubmit after 64gb memory limit exceeded. Ran to completion on 80gb.
+Complex,Selfloops,5656957,32/32,20/32,10,0.14,Trials 00008 and 00010 started THEN errored out so config was not the issue on those.
+Transe,Selfloops,5610576,3* /32,3/3,0,0.88 on validation data,* 3rd trial reached epoch 428 before being cut off by time - this trial's model should be useful for testing.
+Conve,Multidrug,5610496,6/32,4/6,2,0.02,Only 4 trials run to early stopping (epoch 55). Terrible efficiency.
+Complex,Multidrug,5621565,23/32,12/23,9,0.05,Trials 00010 and 00021 started THEN errored out
+Transe,Multidrug,5621566,8/32,8/8,0,0.02,All 8 ran to early stopping at epoch 55
+ConvE,Non-naïve,-,-,-,-,,80gb memory allowance causes OOM error before any trials started. Resubbed with maximum 88gb after which job was simply 'killed'. Probably OOM again but not certain.
+Complex,Non-naïve,5677092,18/32,9/18,9,0.12,N/A
+Transe,Non-naïve,5677093,8/32,8/8,0,0.02,All 8 ran to early stopping at epoch 55
