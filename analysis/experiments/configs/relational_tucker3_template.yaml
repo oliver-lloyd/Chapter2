@@ -16,8 +16,7 @@ ax_search:
       Rprop, SGD]
   - name: train.loss
     type: choice
-    values: [bce,    ce, kl, soft_margin,
-      se]
+    values: [bce, ce, kl, soft_margin, se]
   - bounds: [0.0003, 1.0]
     log_scale: true
     name: train.optimizer_args.lr
