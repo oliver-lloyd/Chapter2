@@ -12,7 +12,7 @@ ax_search:
     value: negative_sampling
   - name: train.optimizer
     type: choice
-    values: [Adam, Adagrad, Adadelta, AdamW, SparseAdam, Adamax, ASGD, LBFGS, RMSprop,
+    values: [Adam, Adagrad, Adadelta, AdamW, SparseAdam, Adamax, ASGD, RMSprop,
       Rprop, SGD]
   - name: train.loss
     type: choice
