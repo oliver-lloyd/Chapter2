@@ -1,7 +1,6 @@
 *.DS_Store
 data/raw/bio*.csv
-data/processed/*.tsv
-data/graphs/*/full*.tsv
+**/*.tsv
 data/graphs/non-naive/feature_vectors/full_features.csv
 analysis/pilot/*/202*
 analysis/pilot/*/slurm*
