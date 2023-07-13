@@ -4,11 +4,11 @@ import torch
 from sklearn.decomposition import PCA
 
 # Load data
-edges = pd.read_csv('../../../processed/monopharmacy_edges.tsv', header=None, sep='\t').drop(columns=[1])
+edges = pd.read_csv('/bp1/mrcieu1/users/fu19841/Chapter2/data/processed/monopharmacy_edges.tsv', header=None, sep='\t').drop(columns=[1])
 edges.columns = ['drug', 'side_effect']
 
 # Load nodelist to function as index
-nodelist = pd.read_csv('../entity_ids.del', header=None, sep='\t', index_col=0)
+nodelist = pd.read_csv('entity_ids.del', header=None, sep='\t', index_col=0)
 
 # Create dataframe for full features
 drugs = edges.drug.unique()
