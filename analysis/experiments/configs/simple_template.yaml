@@ -70,7 +70,7 @@ negative_sampling.implementation: sp_po
 search.num_workers: 1
 search.on_error: continue
 search.type: ax
-train: {auto_correct: true, max_epochs: 500, abort_on_nan: false}
+train: {auto_correct: true, max_epochs: 500, subbatch_auto_tune: true, abort_on_nan: false}
 valid:
   early_stopping: {min_threshold.epochs: 50, min_threshold.metric_value: 0.25, patience: 20}
   every: 5
