@@ -24,4 +24,4 @@ out_edges = out_edges.append(polySE, ignore_index=True)
 del polySE
 
 # Save edges
-out_edges.to_csv('full_edgelist_selfloops.tsv', sep='\t', header=None, index=False)
+out_edges.to_csv('edgelist_selfloops.tsv', sep='\t', header=None, index=False)
