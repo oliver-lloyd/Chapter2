@@ -4,7 +4,7 @@ import torch
 from sklearn.decomposition import PCA
 
 # Load data
-edges = pd.read_csv('/bp1/mrcieu1/users/fu19841/Chapter2/data/processed/monopharmacy_edges.tsv', header=None, sep='\t').drop(columns=[1])
+edges = pd.read_csv('../../../../data/processed/monopharmacy_edges.tsv', header=None, sep='\t').drop(columns=[1])
 edges.columns = ['drug', 'side_effect']
 
 # Load nodelist to function as index
