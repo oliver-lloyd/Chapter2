@@ -60,6 +60,11 @@ holdout = pd.read_csv(
 # Load checkpoint
 checkpoint = load_checkpoint(args.model_checkpoint)
 model = KgeModel.create_from(checkpoint)
+model_name = model.model
+if model_name == 'reciprocal_relations_model':
+    model_name = model.config.options.get(
+        'reciprocal_relations_model'
+        )['base_model']['type']
 
 # Calculate metrics per relation type
 # TODO: parallelise this, but beware of memory usage on large data
@@ -78,7 +83,12 @@ for rel_id, subdf in holdout.groupby(1):
     o = torch.Tensor([edge[2] for edge in edges_to_score])
 
     # Get predictions
-    preds = model.score_spo(s, p, o).tolist()
+    if model.model != 'reciprocal_relations_model':
+        preds = model.score_spo(s, p, o).tolist()
+    else:
+        preds_s = model.score_spo(s, p, o, direction='s').tolist()
+        preds_o = model.score_spo(s, p, o, direction='o').tolist()
+        preds = [np.mean(tup) for tup in zip(preds_s, preds_o)]
     labels = [1 for _ in positive_edges] + [0 for _ in negative_edges]
     assert len(preds) == len(labels)
 
@@ -110,4 +120,4 @@ else:
     if data_dir_name.endswith('/'):
         data_dir_name = data_dir_name[:-1]
     data_dir_name = data_dir_name.split('/')[-1]
-    results.to_csv(f'results_{data_dir_name}.csv', index=False)
+    results.to_csv(f'results_{data_dir_name}_{model_name}.csv', index=False)
