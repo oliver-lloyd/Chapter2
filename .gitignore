@@ -4,3 +4,4 @@ data/raw/bio*.csv
 **/full_features.csv
 analysis/pilot/*/202*
 analysis/pilot/*/slurm*
+analysis/assessment/testing
