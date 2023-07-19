@@ -57,6 +57,20 @@ holdout = pd.read_csv(
     header=None
 )
 
+# Convert holdout edges to IDs if necessary
+if all(holdout.dtypes == object):
+    entity_name_to_id = {entity_ids[key]: key for key in entity_ids}
+    holdout[0] = [entity_name_to_id[name] for name in holdout[0]]
+    holdout[2] = [entity_name_to_id[name] for name in holdout[2]]
+
+    relation_name_to_id = {relation_ids[key]: key for key in relation_ids}
+    holdout[1] = [relation_name_to_id[name] for name in holdout[1]]
+elif any(holdout.dtypes == object):
+    raise ValueError(
+        'Appears as though there is a mix of IDs and strings in holdout data.'
+    ) 
+
+
 # Load checkpoint
 checkpoint = load_checkpoint(args.model_checkpoint)
 model = KgeModel.create_from(checkpoint)
