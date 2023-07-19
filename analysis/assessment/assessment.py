@@ -1,11 +1,13 @@
 import pandas as pd
 import numpy as np
+import multiprocessing as mp
 import torch
 import decagon_rank_metrics
 import argparse
 from kge.model import KgeModel
 from kge.util.io import load_checkpoint
 from sklearn.metrics import roc_auc_score, average_precision_score
+from copy import copy
 
 
 def create_negative_edges(pos_edges, entity_list):
@@ -29,6 +31,7 @@ parser.add_argument('model_checkpoint')
 parser.add_argument('holdout_edges')
 parser.add_argument('libkge_data_dir')
 parser.add_argument('--out_name')
+parser.add_argument('--num_cores')
 args = parser.parse_args()
 
 # Load data
@@ -68,8 +71,7 @@ if all(holdout.dtypes == object):
 elif any(holdout.dtypes == object):
     raise ValueError(
         'Appears as though there is a mix of IDs and strings in holdout data.'
-    ) 
-
+    )
 
 # Load checkpoint
 checkpoint = load_checkpoint(args.model_checkpoint)
@@ -80,12 +82,13 @@ if model_name == 'reciprocal_relations_model':
         'reciprocal_relations_model'
         )['base_model']['type']
 
+
 # Calculate metrics per relation type
-# TODO: parallelise this, but beware of memory usage on large data
-results = []
-for rel_id, subdf in holdout.groupby(1):
+# TODO: why does 2.1 never print? Something goes wrong when predicting from model in subprocess
+def calculate_metrics_for_rel(rel_id, holdout_this_rel):
+    print(1)
     # Get data
-    positive_edges = subdf.to_numpy().tolist()
+    positive_edges = holdout_this_rel.to_numpy().tolist()
     train_subdf = full_edgelist.loc[full_edgelist[1] == rel_id]
     negative_edges = create_negative_edges(
         positive_edges + train_subdf.to_numpy().tolist(),
@@ -95,17 +98,19 @@ for rel_id, subdf in holdout.groupby(1):
     s = torch.Tensor([edge[0] for edge in edges_to_score])
     p = torch.Tensor([rel_id for edge in edges_to_score])
     o = torch.Tensor([edge[2] for edge in edges_to_score])
-
+    print(2)
     # Get predictions
     if model.model != 'reciprocal_relations_model':
+        print(2.1)
         preds = model.score_spo(s, p, o).tolist()
+        print(2.2)
     else:
         preds_s = model.score_spo(s, p, o, direction='s').tolist()
         preds_o = model.score_spo(s, p, o, direction='o').tolist()
         preds = [np.mean(tup) for tup in zip(preds_s, preds_o)]
     labels = [1 for _ in positive_edges] + [0 for _ in negative_edges]
     assert len(preds) == len(labels)
-
+    print(3)
     # Calculate area-under metrics
     roc = roc_auc_score(labels, preds)
     prc = average_precision_score(labels, preds)
@@ -118,11 +123,16 @@ for rel_id, subdf in holdout.groupby(1):
         edges_ranked[1].values,
         k=50
     )
+    print(4)
+    return [relation_ids[rel_id], roc, prc, ap50]
 
-    # Store metrics for target relation
-    relation = relation_ids[rel_id]
-    results.append([relation, roc, prc, ap50])
 
+# Perform calculations in parallel
+mp_args = list(holdout.groupby(1))
+with mp.Pool(int(args.num_cores)) as pool:
+    results = pool.starmap(calculate_metrics_for_rel, mp_args)
+
+# Store results
 results = pd.DataFrame(
     results,
     columns=['Relation', 'AUROC', 'AUPRC', 'AP@50']
