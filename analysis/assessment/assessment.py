@@ -25,10 +25,13 @@ def create_negative_edges(pos_edges, entity_list):
 
 # Get user args
 parser = argparse.ArgumentParser()
+
 parser.add_argument('model_checkpoint')
 parser.add_argument('holdout_edges')
 parser.add_argument('libkge_data_dir')
 parser.add_argument('--out_name')
+parser.add_argument('--partial_results')
+
 args = parser.parse_args()
 
 # Load data
@@ -68,7 +71,7 @@ if all(holdout.dtypes == object):
 elif any(holdout.dtypes == object):
     raise ValueError(
         'Appears as though there is a mix of IDs and strings in holdout data.'
-    ) 
+    )
 
 
 # Load checkpoint
@@ -80,53 +83,63 @@ if model_name == 'reciprocal_relations_model':
         'reciprocal_relations_model'
         )['base_model']['type']
 
+# Create out df
+if args.partial_results:
+    results = pd.read_csv(args.partial_results)
+else:
+    results = pd.DataFrame(columns=['Relation', 'AUROC', 'AUPRC', 'AP@50'])
+
 # Calculate metrics per relation type
 # TODO: parallelise this, but beware of memory usage on large data
-results = []
+rel_count = len(holdout[1].unique())
 for rel_id, subdf in holdout.groupby(1):
-    # Get data
-    positive_edges = subdf.to_numpy().tolist()
-    train_subdf = full_edgelist.loc[full_edgelist[1] == rel_id]
-    negative_edges = create_negative_edges(
-        positive_edges + train_subdf.to_numpy().tolist(),
-        list(entity_ids.keys())
-    )
-    edges_to_score = positive_edges + negative_edges
-    s = torch.Tensor([edge[0] for edge in edges_to_score])
-    p = torch.Tensor([rel_id for edge in edges_to_score])
-    o = torch.Tensor([edge[2] for edge in edges_to_score])
-
-    # Get predictions
-    if model.model != 'reciprocal_relations_model':
-        preds = model.score_spo(s, p, o).tolist()
-    else:
-        preds_s = model.score_spo(s, p, o, direction='s').tolist()
-        preds_o = model.score_spo(s, p, o, direction='o').tolist()
-        preds = [np.mean(tup) for tup in zip(preds_s, preds_o)]
-    labels = [1 for _ in positive_edges] + [0 for _ in negative_edges]
-    assert len(preds) == len(labels)
-
-    # Calculate area-under metrics
-    roc = roc_auc_score(labels, preds)
-    prc = average_precision_score(labels, preds)
-
-    # Calculate average precision @ 50 using Decagon's function
-    edges_ranked = pd.DataFrame(zip(preds, edges_to_score))
-    edges_ranked.sort_values(0, ascending=False, inplace=True)
-    ap50 = decagon_rank_metrics.apk(
-        positive_edges,
-        edges_ranked[1].values,
-        k=50
-    )
-
-    # Store metrics for target relation
+    # Check if already assessed
     relation = relation_ids[rel_id]
-    results.append([relation, roc, prc, ap50])
+    if relation not in results.Relation:
+        # Get data
+        positive_edges = subdf.to_numpy().tolist()
+        train_subdf = full_edgelist.loc[full_edgelist[1] == rel_id]
+        negative_edges = create_negative_edges(
+            positive_edges + train_subdf.to_numpy().tolist(),
+            list(entity_ids.keys())
+        )
+        edges_to_score = positive_edges + negative_edges
+        s = torch.Tensor([edge[0] for edge in edges_to_score])
+        p = torch.Tensor([rel_id for edge in edges_to_score])
+        o = torch.Tensor([edge[2] for edge in edges_to_score])
 
-results = pd.DataFrame(
-    results,
-    columns=['Relation', 'AUROC', 'AUPRC', 'AP@50']
-)
+        # Get predictions
+        if model.model != 'reciprocal_relations_model':
+            preds = model.score_spo(s, p, o).tolist()
+        else:
+            preds_s = model.score_spo(s, p, o, direction='s').tolist()
+            preds_o = model.score_spo(s, p, o, direction='o').tolist()
+            preds = [np.mean(tup) for tup in zip(preds_s, preds_o)]
+        labels = [1 for _ in positive_edges] + [0 for _ in negative_edges]
+        assert len(preds) == len(labels)
+
+        # Calculate area-under metrics
+        roc = roc_auc_score(labels, preds)
+        prc = average_precision_score(labels, preds)
+
+        # Calculate average precision at 50 using Decagon's function
+        edges_ranked = pd.DataFrame(zip(preds, edges_to_score))
+        edges_ranked.sort_values(0, ascending=False, inplace=True)
+        ap50 = decagon_rank_metrics.apk(
+            positive_edges,
+            edges_ranked[1].values,
+            k=50
+        )
+
+        # Store metrics for target relation
+        results.loc[len(results)] = ([relation, roc, prc, ap50])
+        results.to_csv('results_temp.csv', index=False)
+
+        # Progress update
+        print(f'Assessed {relation}. {len(results)}/{rel_count} now done.')
+    else:
+        print(f'Result found for relation: {relation}. Skipping..')
+
 if args.out_name:
     results.to_csv(args.out_name, index=False)
 else:
