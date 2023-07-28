@@ -1,12 +1,50 @@
 import pandas as pd
 import argparse
 import multiprocessing as mp
+import networkx as nx
+import numpy as np
 
 # Get specified target file
 parser = argparse.ArgumentParser()
 parser.add_argument('edgelist_tsv')
 parser.add_argument('--output_dir')
 args = parser.parse_args()
+
+
+def construct_graph(nodes, edges):
+    graph = nx.Graph()
+    graph.add_nodes_from(nodes)
+    graph.add_edges_from(edges)
+    return graph
+
+
+def get_edge_stats(df, rel, rel_nodes_dict):
+    edges = df.query('relation == @rel')[['head', 'tail']].to_numpy()
+    count = len(edges)
+    if rel != 'DrugTarget':
+        g = construct_graph(rel_nodes_dict[rel], edges)
+        density = nx.density(g)
+        transitivity = nx.transitivity(g)
+    else:
+        g = nx.Graph()
+        g.add_nodes_from(rel_nodes_dict[rel][0], bipartite=0)
+        g.add_nodes_from(rel_nodes_dict[rel][1], bipartite=1)
+        g.add_edges_from(edges)
+        num_dyads = len(rel_nodes_dict[rel][0]) * len(rel_nodes_dict[rel][1])
+        density = count / num_dyads
+        transitivity = None
+    n_components = nx.number_connected_components(g)
+    try:
+        diameter = nx.diameter(g)
+    except nx.exception.NetworkXError:
+        largest_comp = sorted(
+            nx.connected_components(g),
+            key=len, reverse=True
+        )[0]
+        diameter = nx.diameter(g.subgraph(largest_comp))
+
+    return ['edge', rel, count, density, n_components, diameter, transitivity]
+
 
 # Load data
 file_loc = args.edgelist_tsv
@@ -16,17 +54,44 @@ edges = pd.read_csv(
 edges.columns = ['head', 'relation', 'tail']
 
 # Get set of all nodes
-nodes = set()
+drug_nodes = set()
+protein_nodes = set()
 for col in ['head', 'tail']:
     for node in edges[col].unique():
-        nodes.add(node)
+        try:
+            protein_nodes.add(str(int(node)))  # Protein nodes are ints
+        except ValueError:
+            if node.startswith('CID'):
+                drug_nodes.add(node)
+            else:
+                raise ValueError(f'Found node of unknown type: {node}')
+n_proteins = len(protein_nodes)
+n_drugs = len(drug_nodes)
 
-# Get node counts
-total = len(nodes)
-n_proteins = len(
-    [node for node in nodes if not node.startswith('C')]
-)  # Protein IDs are just ints
-n_drugs = total - n_proteins
+# Node dict
+nodes_per_relation = {}
+for rel in edges.relation.unique():
+    if rel.startswith('C'):
+        nodes_per_relation[rel] = drug_nodes
+nodes_per_relation['ProteinProteinInteraction'] = protein_nodes
+nodes_per_relation['DrugTarget'] = [drug_nodes, protein_nodes]
+
+# Create output dataframe
+cols = [
+    'type', 'name', 'count',
+    'density', 'num_components',
+    'largest_component_diameter',
+    'transitivity'
+]
+node_rows = [
+    ['node', 'Total', n_drugs + n_proteins],
+    ['node', 'Proteins', n_proteins],
+    ['node', 'Drugs', n_drugs]
+]
+for row in node_rows:
+    while len(row) < len(cols):
+        row.append(None)
+out_df = pd.DataFrame(node_rows, columns=cols)
 
 # Counts of all possible dyads
 dyads_counts = {
@@ -35,51 +100,23 @@ dyads_counts = {
     'SideEffect': (n_drugs * (n_drugs-1))/2
 }
 
-
-def edge_count(df, rel):
-    count = len(df.loc[df.relation == rel])
-    return count
-
-
-def get_density(count, rel, dyad_count_dict):
-    if rel.startswith('C'):
-        # All side effect nodes start with the character 'C'
-        n_dyads = dyad_count_dict['SideEffect']
-    else:
-        n_dyads = dyad_count_dict[rel]
-    return count/n_dyads
-
-
-def get_edge_stats(df, rel, dyad_dict):
-    count = edge_count(df, rel)
-    density = get_density(count, rel, dyad_dict)
-    return ['edge', rel, count, density]
-
-
-mp_args = [
-    [edges, rel, dyads_counts] for rel in edges.relation.unique()
-]
-with mp.Pool(mp.cpu_count()) as pool:
-    edge_stats = pool.starmap(get_edge_stats, mp_args)
-
-# Create output dataframe
-cols = ['type', 'name', 'count', 'density']
-out_df = pd.DataFrame(columns=cols)
-
-# Store node stats
-out_df.loc[len(out_df)] = ['node', 'Total', total, None]
-out_df.loc[len(out_df)] = ['node', 'Proteins', n_proteins, None]
-out_df.loc[len(out_df)] = ['node', 'Drugs', n_drugs, None]
-
 # Calculate full graph stats
 total_dyads = dyads_counts['ProteinProteinInteraction']
 total_dyads += dyads_counts['DrugTarget']
 total_dyads += dyads_counts['SideEffect'] * len(edges.relation.unique())
 edge_count = len(edges)
 total_density = edge_count / total_dyads
-out_df.loc[len(out_df)] = ['edge', 'Total', edge_count, total_density]
+full_graph_row = ['edge', 'Total', edge_count, total_density]
+while len(full_graph_row) < len(cols):
+    full_graph_row.append(None)
+out_df.loc[len(out_df)] = full_graph_row
 
 # Add per-relation stats
+mp_args = [
+    [edges, rel, nodes_per_relation] for rel in edges.relation.unique()
+]
+with mp.Pool(mp.cpu_count()) as pool:
+    edge_stats = pool.starmap(get_edge_stats, mp_args)
 out_df = out_df.append(pd.DataFrame(edge_stats, columns=cols))
 
 # Write to disk
