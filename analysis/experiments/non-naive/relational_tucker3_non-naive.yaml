@@ -32,15 +32,6 @@ ax_search:
     name: lookup_embedder.dim
     type: choice
     values: [32, 64, 128, 256, 512]
-  - name: lookup_embedder.initialize
-    type: choice
-    values: [xavier_normal_, xavier_uniform_, normal_, uniform_]
-  - {name: lookup_embedder.initialize_args.normal_.mean, type: fixed, value: 0.0}
-  - {log_scale: true, name: lookup_embedder.initialize_args.normal_.std, type: fixed,
-    value: 0.006737}
-  - {name: lookup_embedder.initialize_args.uniform_.a, type: fixed, value: -0.5}
-  - {name: lookup_embedder.initialize_args.xavier_uniform_.gain, type: fixed, value: 1.0}
-  - {name: lookup_embedder.initialize_args.xavier_normal_.gain, type: fixed, value: 1.0}
   - is_ordered: true
     name: lookup_embedder.regularize
     type: choice
