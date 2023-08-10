@@ -12,7 +12,7 @@ ax_search:
     values: [1vsAll, KvsAll, negative_sampling]
   - name: train.optimizer
     type: choice
-    values: [Adam, Adagrad, Adadelta, AdamW, SparseAdam, Adamax, RMSprop]
+    values: [Adam, Adadelta, AdamW,  Adamax, RMSprop]
   - name: train.loss
     type: choice
     values: [bce, ce, kl, se]
@@ -60,9 +60,9 @@ negative_sampling.implementation: sp_po
 search.num_workers: 1
 search.on_error: continue
 search.type: ax
-train: {auto_correct: true, max_epochs: 500, subbatch_auto_tune: true}
+train: {auto_correct: true, max_epochs: 5, subbatch_auto_tune: true}
 valid:
-  early_stopping: {min_threshold.epochs: 50, min_threshold.metric_value: 0.1, patience: 10}
+  early_stopping: {min_threshold.epochs: 4, min_threshold.metric_value: 0.1, patience: 10}
   every: 5
   filter_with_test: true
   metric: mean_reciprocal_rank_filtered_with_test
