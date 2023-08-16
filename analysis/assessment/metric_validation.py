@@ -3,15 +3,15 @@ from decagon_rank_metrics import apk
 from sklearn.metrics import roc_auc_score, average_precision_score
 
 
-def metric_check(metric_func, pred, actual, expected_val, tolerance):
-    score = metric_func(actual, pred)
-    diff = np.abs(expected_val - score)
+def metric_check(metric_func, pred_values, actual_values, expected_score, tolerance):
+    score = metric_func(actual_values, pred_values)
+    diff = np.abs(expected_score - score)
     tol_check = diff <= tolerance
     return tol_check
 
 
-def ap50(pred, actual):
-    return apk(actual, pred, 50)
+def ap50(pred_values, actual_values):
+    return apk(actual_values, pred_values, 50)
 
 
 #1 AUC: ROC and PRC
