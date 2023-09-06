@@ -33,6 +33,7 @@ parser.add_argument('--out_name')
 parser.add_argument('--partial_results')
 
 args = parser.parse_args()
+np.random.seed(0)
 
 # Load data
 entity_ids = pd.read_csv(
@@ -102,6 +103,10 @@ for rel_id, subdf in holdout.groupby(1):
         negative_edges = create_negative_edges(
             positive_edges + train_subdf.to_numpy().tolist(),
             list(entity_ids.keys())
+        )
+        pd.DataFrame(negative_edges).to_csv(
+            f'false_edges/{rel_id}.tsv', 
+            header=None, sep='\t', index=False
         )
         edges_to_score = positive_edges + negative_edges
         s = torch.Tensor([edge[0] for edge in edges_to_score])
