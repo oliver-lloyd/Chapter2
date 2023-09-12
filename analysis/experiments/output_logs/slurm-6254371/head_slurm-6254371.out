@@ -1,0 +1,10 @@
+cpu-bind=MASK - bp1-gpu022, task  0  0 [2501]: mask 0x101 set
+/bp1/mrcieu1/users/fu19841
+bp1-gpu022.data.bp.acrc.priv
+Tue  5 Sep 07:37:10 BST 2023
+[INFO 09-05 07:37:43] ax.service.ax_client: Starting optimization with verbose logging. To disable logging, set the `verbose_logging` argument to `False`. Note that float values in the logs are rounded to 2 decimal points.
+[INFO 09-05 07:37:43] ax.service.utils.instantiation: Inferred value type of ParameterType.INT for parameter train.batch_size. If that is not the expected value type, you can explicity specify 'value_type' ('int', 'float', 'bool' or 'str') in parameter dict.
+[INFO 09-05 07:37:43] ax.service.utils.instantiation: Inferred value type of ParameterType.STRING for parameter train.type. If that is not the expected value type, you can explicity specify 'value_type' ('int', 'float', 'bool' or 'str') in parameter dict.
+[INFO 09-05 07:37:43] ax.service.utils.instantiation: Inferred value type of ParameterType.STRING for parameter train.optimizer. If that is not the expected value type, you can explicity specify 'value_type' ('int', 'float', 'bool' or 'str') in parameter dict.
+[INFO 09-05 07:37:43] ax.service.utils.instantiation: Inferred value type of ParameterType.STRING for parameter train.loss. If that is not the expected value type, you can explicity specify 'value_type' ('int', 'float', 'bool' or 'str') in parameter dict.
+[INFO 09-05 07:37:43] ax.service.utils.instantiation: Inferred value type of ParameterType.FLOAT for parameter train.optimizer_args.lr. If that is not the expected value type, you can explicity specify 'value_type' ('int', 'float', 'bool' or 'str') in parameter dict.

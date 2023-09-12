@@ -1,0 +1,10 @@
+[48248bc6]   train.loss: kl
+[48248bc6]   train.lr_scheduler: ReduceLROnPlateau
+[48248bc6]   train.lr_scheduler_args.factor: 0.5
+[48248bc6]   train.lr_scheduler_args.mode: max
+[48248bc6]   train.lr_scheduler_args.patience: 5
+[48248bc6]   train.lr_scheduler_args.threshold: 0.0001
+[48248bc6]   train.optimizer: Adamax
+[48248bc6]   train.optimizer_args.lr: 0.002763559617464863
+[48248bc6]   train.type: 1vsAll
+Tue Aug 22 19:07:24 BST 2023
