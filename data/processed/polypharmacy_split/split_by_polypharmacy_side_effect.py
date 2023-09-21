@@ -23,8 +23,6 @@ while not done:
             train_edges, test_edges = train_test_split(subdf, test_size=0.1)
             train_df = train_df.append(train_edges)
             holdout_df = holdout_df.append(test_edges)
-        else:
-            train_df = train_df.append(subdf)
 
     holdout_nodes = set()
     train_nodes = set()
