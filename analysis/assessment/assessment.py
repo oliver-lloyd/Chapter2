@@ -106,7 +106,7 @@ for rel_id, subdf in holdout.groupby(1):
             train_subdf = full_edgelist.loc[full_edgelist[1] == rel_id]
             negative_edges = create_negative_edges(
                 positive_edges + train_subdf.to_numpy().tolist(),
-                list(entity_ids.keys())
+                compound_IDs
             )
             pd.DataFrame(negative_edges).to_csv(
                 f'false_edges/{false_edge_file}', 
