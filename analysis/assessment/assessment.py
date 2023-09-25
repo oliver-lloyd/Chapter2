@@ -42,6 +42,7 @@ entity_ids = pd.read_csv(
     header=None,
     index_col=0
 ).to_dict()[1]
+compound_IDs = [key for key in entity_ids if entity_ids[key].startswith('CID')]
 relation_ids = pd.read_csv(
     f'{args.libkge_data_dir}/relation_ids.del',
     sep='\t',
@@ -102,7 +103,7 @@ for rel_id, subdf in holdout.groupby(1):
         train_subdf = full_edgelist.loc[full_edgelist[1] == rel_id]
         negative_edges = create_negative_edges(
             positive_edges + train_subdf.to_numpy().tolist(),
-            list(entity_ids.keys())
+            compound_IDs
         )
         pd.DataFrame(negative_edges).to_csv(
             f'false_edges/{rel_id}.tsv', 
