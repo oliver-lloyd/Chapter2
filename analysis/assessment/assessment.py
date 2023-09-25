@@ -3,6 +3,7 @@ import numpy as np
 import torch
 import decagon_rank_metrics
 import argparse
+from os import listdir
 from kge.model import KgeModel
 from kge.util.io import load_checkpoint
 from sklearn.metrics import roc_auc_score, average_precision_score
@@ -29,7 +30,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('model_checkpoint')
 parser.add_argument('holdout_edges')
 parser.add_argument('libkge_data_dir')
-parser.add_argument('--out_name')
+parser.add_argument('out_dir')
 parser.add_argument('--partial_results')
 
 args = parser.parse_args()
@@ -71,9 +72,8 @@ if all(holdout.dtypes == object):
     holdout[1] = [relation_name_to_id[name] for name in holdout[1]]
 elif any(holdout.dtypes == object):
     raise ValueError(
-        'Appears as though there is a mix of IDs and strings in holdout data.'
+        'Appears that there is a mix of IDs and strings in holdout data.'
     )
-
 
 # Load checkpoint
 checkpoint = load_checkpoint(args.model_checkpoint)
@@ -97,17 +97,27 @@ for rel_id, subdf in holdout.groupby(1):
     # Check if already assessed
     relation = relation_ids[rel_id]
     if relation not in results.Relation:
-        # Get data
+        # Get assessment data
         positive_edges = subdf.to_numpy().tolist()
-        train_subdf = full_edgelist.loc[full_edgelist[1] == rel_id]
-        negative_edges = create_negative_edges(
-            positive_edges + train_subdf.to_numpy().tolist(),
-            list(entity_ids.keys())
-        )
-        pd.DataFrame(negative_edges).to_csv(
-            f'false_edges/{rel_id}.tsv', 
-            header=None, sep='\t', index=False
-        )
+        false_edge_file = f'{rel_id}.tsv'
+        if false_edge_file not in listdir('false_edges'):
+            # Create negative edges if haven't already
+            train_subdf = full_edgelist.loc[full_edgelist[1] == rel_id]
+            negative_edges = create_negative_edges(
+                positive_edges + train_subdf.to_numpy().tolist(),
+                list(entity_ids.keys())
+            )
+            pd.DataFrame(negative_edges).to_csv(
+                f'false_edges/{false_edge_file}', 
+                header=None, sep='\t', index=False
+            )
+        else:
+            # Otherwise load negative edges
+            negative_edges = pd.read_csv(
+                f'false_edges/{false_edge_file}', 
+                header=None, 
+                sep='\t'
+            ).to_numpy().tolist()
         edges_to_score = positive_edges + negative_edges
         s = torch.Tensor([edge[0] for edge in edges_to_score])
         p = torch.Tensor([rel_id for edge in edges_to_score])
@@ -138,18 +148,11 @@ for rel_id, subdf in holdout.groupby(1):
 
         # Store metrics for target relation
         results.loc[len(results)] = ([relation, roc, prc, ap50])
-        results.to_csv('results_temp.csv', index=False)
+        results.to_csv(f'{args.out_dir}/results_temp.csv', index=False)
 
         # Progress update
         print(f'Assessed {relation}. {len(results)}/{rel_count} now done.')
     else:
         print(f'Result found for relation: {relation}. Skipping..')
 
-if args.out_name:
-    results.to_csv(args.out_name, index=False)
-else:
-    data_dir_name = args.libkge_data_dir
-    if data_dir_name.endswith('/'):
-        data_dir_name = data_dir_name[:-1]
-    data_dir_name = data_dir_name.split('/')[-1]
-    results.to_csv(f'results_{data_dir_name}_{model_name}.csv', index=False)
+results.to_csv(f'{args.out_dir}/results_full.csv', index=False)
