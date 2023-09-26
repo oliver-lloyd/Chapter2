@@ -7,4 +7,4 @@ analysis/pilot/*/slurm*
 analysis/assessment/testing
 **/__pycache__
 data/figures/testing.ipynb
-analysis/false_start/checkpoints/*.pt
+analysis/false_start/checkpoints
