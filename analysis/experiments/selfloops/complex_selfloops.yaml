@@ -61,7 +61,7 @@ ax_search:
   - bounds: [0.0, 0.5]
     name: complex.relation_embedder.dropout
     type: range
-dataset.name: decagon_selfloops_poly_split
+dataset.name: selfloops
 eval: {batch_size: 256, metrics_per.relation_type: true}
 import: [complex]
 job.type: search

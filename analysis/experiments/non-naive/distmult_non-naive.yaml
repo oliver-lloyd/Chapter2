@@ -52,7 +52,7 @@ ax_search:
   - bounds: [0.0, 0.5]
     name: distmult.relation_embedder.dropout
     type: range
-dataset.name: decagon_non-naive_poly_split
+dataset.name: non-naive
 eval: {batch_size: 256, metrics_per.relation_type: true}
 import: [distmult]
 job.type: search
