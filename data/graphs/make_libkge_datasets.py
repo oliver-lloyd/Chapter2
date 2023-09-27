@@ -20,7 +20,7 @@ for graph_name in ['selfloops', 'non-naive']:
 
         # Load graph edgelist AFTER holdout edges have been removed
         edgelist = pd.read_csv(
-            f'graphs/{graph_name}/edgelist_{graph_name}.tsv', 
+            f'{graph_name}/edgelist_{graph_name}.tsv', 
             sep='\t', header=None
         )
 
