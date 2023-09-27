@@ -21,9 +21,9 @@ dfs['monopharmacy'].drop(columns=['Side Effect Name'], inplace=True)
 dfs['polypharmacy'].drop(columns=['Side Effect Name'], inplace=True)
 
 # Process all to (h, r, t) format
-dfs['ppi']['r'] = 'ProteinProteinInteraction'
-dfs['ppi'].columns = ['h', 't', 'r']
-dfs['ppi'] = dfs['ppi'][['h', 'r', 't']]
+dfs['ppi']['r'] = 'ProteinProteinInteraction'  # Set relation column values
+dfs['ppi'].columns = ['h', 't', 'r']  # Set column names
+dfs['ppi'] = dfs['ppi'][['h', 'r', 't']]  # Order the columns correctly
 
 dfs['drug-target']['r'] = 'DrugTarget'
 dfs['drug-target'].columns = ['h', 't', 'r']
@@ -33,10 +33,10 @@ dfs['monopharmacy']['r'] = 'MonopharmacySideEffect'
 dfs['monopharmacy'].columns = ['h', 't', 'r']
 dfs['monopharmacy'] = dfs['monopharmacy'][['h', 'r', 't']]
 
-dfs['polypharmacy'].columns = ['h', 't', 'r']  # Don't need to add 'r' column (as above), just have to rename from 'Polypharmacy Side Effect'
+dfs['polypharmacy'].columns = ['h', 't', 'r']  # Don't need to add 'r' column (as above), just have to rename 'Polypharmacy Side Effect' column
 dfs['polypharmacy'] = dfs['polypharmacy'][['h', 'r', 't']]
 
-# Filter polypharmacy side effects 
+# Filter polypharmacy side effects by frequency
 poly_SE_counts = dict(dfs['polypharmacy']['r'].value_counts())
 poly_SE_to_keep = [SE for SE in poly_SE_counts if poly_SE_counts[SE] >= 500]  # 500 is threshold used in Decagon paper
 dfs['polypharmacy'] = dfs['polypharmacy'].loc[dfs['polypharmacy']['r'].isin(poly_SE_to_keep)]
@@ -47,4 +47,4 @@ core_network.to_csv('core_network_ppi_drugtarget.tsv', index=False, header=None,
 
 # Save Mono-/Polypharmacy side effect data to disk in LibKGE format
 dfs['monopharmacy'].to_csv('monopharmacy_edges.tsv', index=False, header=None, sep='\t')
-dfs['polypharmacy'].to_csv('polypharmacy_edges.tsv', index=False, header=None, sep='\t')
+dfs['polypharmacy'].to_csv('polypharmacy/polypharmacy_edges.tsv', index=False, header=None, sep='\t')

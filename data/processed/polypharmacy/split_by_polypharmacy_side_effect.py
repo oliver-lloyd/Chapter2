@@ -1,6 +1,9 @@
 import pandas as pd
 import argparse
 from sklearn.model_selection import train_test_split
+from numpy.random import seed
+
+seed(0)
 
 parser = argparse.ArgumentParser()
 parser.add_argument('full_edgelist')
