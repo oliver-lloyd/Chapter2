@@ -13,6 +13,7 @@ from sklearn.metrics import roc_auc_score, average_precision_score
 parser = argparse.ArgumentParser()
 parser.add_argument('model_checkpoint')
 parser.add_argument('out_dir')
+parser.add_argument('libkge_data_dir')
 parser.add_argument('--partial_results')
 args = parser.parse_args()
 
@@ -26,6 +27,39 @@ if model_name == 'reciprocal_relations_model':
     model_name = model.config.options.get(
         'reciprocal_relations_model'
         )['base_model']['type']
+
+# Load entity and relation keys
+relation_ids = pd.read_csv(
+    f'{args.libkge_data_dir}/relation_ids.del',
+    sep='\t',
+    header=None,
+    index_col=0
+).to_dict()[1]
+entity_ids = pd.read_csv(
+    f'{args.libkge_data_dir}/entity_ids.del',
+    sep='\t',
+    header=None,
+    index_col=0
+).to_dict()[1]
+
+# Load holdout data
+holdout = pd.read_csv(
+    '../../data/processed/polypharmacy/holdout_polypharmacy.tsv',
+    header=None, sep='\t'
+)
+
+# Convert holdout names to IDs
+if all(holdout.dtypes == object):
+    entity_name_to_id = {entity_ids[key]: key for key in entity_ids}
+    holdout[0] = [entity_name_to_id[name] for name in holdout[0]]
+    holdout[2] = [entity_name_to_id[name] for name in holdout[2]]
+
+    relation_name_to_id = {relation_ids[key]: key for key in relation_ids}
+    holdout[1] = [relation_name_to_id[name] for name in holdout[1]]
+elif any(holdout.dtypes == object):
+    raise ValueError(
+        'Appears that there is a mix of IDs and strings in holdout data.'
+    )
 
 # Create out df
 if args.partial_results:
