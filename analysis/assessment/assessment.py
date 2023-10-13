@@ -77,7 +77,7 @@ for rel_id, subdf in holdout.groupby(1):
 
         # Get assessment data
         positive_edges = subdf.to_numpy().tolist()
-        false_edge_file = f'{rel_id}.tsv'
+        false_edge_file = f'{relation}.tsv'
         negative_edges = pd.read_csv(
             f'false_edges/{false_edge_file}',
             header=None,

@@ -72,7 +72,8 @@ if __name__ == '__main__':
     # Make arguments to create false edges in parallel
     parallel_args = []
     for rel_id, holdout_subdf in holdout.groupby(1):
-        false_edge_file = f'{rel_id}.tsv'
+        relation = relation_ids[rel_id]
+        false_edge_file = f'{relation}.tsv'
         if false_edge_file not in listdir('false_edges'):
             positive_edges = holdout_subdf.to_numpy().tolist()
             train_subdf = full_edgelist.loc[full_edgelist[1] == rel_id]
@@ -82,9 +83,9 @@ if __name__ == '__main__':
                 positive_edges,
                 compound_IDs
             ])
-            print(f'Preparing to make false edges for relation: {rel_id}')
+            print(f'Preparing to make false edges for relation: {relation}')
         else:
-            print(f'Found existing fakes for relation: {rel_id}. Skipping..')
+            print(f'Found existing fakes for relation: {relation}. Skipping..')
 
     # Create false edges
     n_cores = mp.cpu_count()
@@ -97,7 +98,8 @@ if __name__ == '__main__':
     print('Saving..')
     for negative_edges in parallel_results:
         rel_id = negative_edges[0][1]
-        false_edge_file = f'{rel_id}.tsv'
+        relation = relation_ids[rel_id]
+        false_edge_file = f'{relation}.tsv'
         pd.DataFrame(negative_edges).to_csv(
             f'false_edges/{false_edge_file}',
             header=None, sep='\t', index=False
