@@ -78,11 +78,20 @@ for rel_id, subdf in holdout.groupby(1):
         # Get assessment data
         positive_edges = subdf.to_numpy().tolist()
         false_edge_file = f'{relation}.tsv'
-        negative_edges = pd.read_csv(
+        negative_edges_str = pd.read_csv(
             f'false_edges/{false_edge_file}',
             header=None,
             sep='\t'
         ).to_numpy().tolist()
+        negative_edges = [
+            [
+                entity_name_to_id[edge[0]],
+                relation_name_to_id[edge[1]],
+                entity_name_to_id[edge[2]]
+            ]
+            for edge in negative_edges_str
+        ]
+
         edges_to_score = positive_edges + negative_edges
         s = torch.Tensor([edge[0] for edge in edges_to_score])
         p = torch.Tensor([rel_id for edge in edges_to_score])
