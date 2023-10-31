@@ -8,3 +8,7 @@ analysis/assessment/testing
 **/__pycache__
 data/figures/testing.ipynb
 analysis/false_start/checkpoints
+**/*.tar.gz
+analysis/experiments/non-naive
+analysis/experiments/selfloops
+**/*.pt
