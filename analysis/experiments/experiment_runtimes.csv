@@ -1,0 +1,7 @@
+Dataset,Model,Runtime(secs)
+selfloops,complex,2436276.0
+selfloops,distmult,904917.0
+selfloops,simple,2078676.0
+non-naive,complex,1591485.0
+non-naive,distmult,1007711.0
+non-naive,simple,2110809.0
