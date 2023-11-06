@@ -37,7 +37,7 @@ decagon_scores = {
     'AP@50': 0.803
 }
 
-# Draw
+# Draw performance results
 for metric in results.columns[1:4]:
     sns.boxplot(x='model', y=metric, hue='dataset', data=results)
     plt.hlines(
@@ -52,3 +52,25 @@ for metric in results.columns[1:4]:
     plt.xlabel('Model')
     plt.savefig(f'{metric}.png')
     plt.clf()
+
+# Load runtime data
+epochs = pd.read_csv('../../experiments/experiment_epochs.csv')
+runtimes = pd.read_csv('../../experiments/experiment_runtimes.csv')
+eff_df = runtimes.merge(
+    epochs, how='left',
+    left_on=['Dataset', 'Model'],
+    right_on=['dataset', 'model']
+)
+eff_df['secs_per_epoch'] = eff_df['Runtime(secs)'] / eff_df['total_epochs']
+eff_df['model'] = [name_format[val] for val in eff_df['model'].values]
+eff_df['dataset'] = [name_format[val] for val in eff_df['dataset'].values]
+
+# Draw runtime barplot
+sns.barplot(y='secs_per_epoch', x='model', hue='dataset', data=eff_df)
+plt.ylim(0, 250)
+plt.legend(title="Dataset")
+plt.title('Per Epoch Running Time')
+plt.ylabel('Seconds/Epoch')
+plt.xlabel('Model')
+plt.savefig('runtime_per_epoch.png')
+plt.clf()
