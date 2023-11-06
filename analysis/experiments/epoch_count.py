@@ -2,15 +2,15 @@ import argparse
 from os import listdir
 
 parser = argparse.ArgumentParser()
-parser.add_argument('raw_experiment_dirs')
+parser.add_argument('raw_experiment_dirs', nargs='+')
 args = parser.parse_args()
 
 out_counts = []
 for experiment_path in args.raw_experiment_dirs:
 
     # Get experiment info
-    exp_name = experiment.split('/')[-1]
-    model_dataset = exp_name.split('-')[-1]
+    exp_name = experiment_path.split('/')[-1]
+    model_dataset = exp_name[16:]
     model = model_dataset.split('_')[0]
     dataset = model_dataset.split('_')[1]
 

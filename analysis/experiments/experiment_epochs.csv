@@ -1,0 +1,7 @@
+model,dataset,total_epochs
+complex,non-naive,8300
+distmult,non-naive,5500
+simple,non-naive,9660
+complex,selfloops,11730
+distmult,selfloops,5500
+simple,selfloops,10245
