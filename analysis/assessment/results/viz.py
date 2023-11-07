@@ -61,7 +61,7 @@ for metric in results.columns[1:4]:
         plt.hlines(0.998, xmin, xmax, label='GAT', linestyles='dashed', colors='red')
 
     plt.xlim(xmin, xmax)
-    plt.ylim(ymin, ymax)
+    plt.ylim(0.5 if metric == "AP@50" else ymin, ymax)
     plt.legend()
     plt.title(f'{metric} by model and dataset')
     plt.ylabel(name_format[metric])
