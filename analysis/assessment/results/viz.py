@@ -26,10 +26,17 @@ for loc in listdir():
         df['dataset'] = name_format[components[1]]
         results = results.append(df)
 
+# Remove untrained model scores if not desired
+include_untrained = False
+if not include_untrained:
+    results = results.loc[results.model != 'Untrained']
+
 # Set drawing parameters
 xmin = -0.5
 xmax = 3.5
-ymin = 0
+if not include_untrained:
+    xmax -= 1
+ymin = 0.8
 ymax = 1
 decagon_scores = {
     'AUROC': 0.872,
@@ -42,8 +49,17 @@ for metric in results.columns[1:4]:
     sns.boxplot(x='model', y=metric, hue='dataset', data=results)
     plt.hlines(
         decagon_scores[metric], xmin, xmax,
-        label=f'Decagon {metric}', colors='red'
+        label='Decagon', colors='black'
     )
+    if metric == 'AUROC':
+        plt.hlines(0.975, xmin, xmax, label='SimVec', colors='green')
+        plt.hlines(0.966, xmin, xmax, label='NNPS', colors='blue')
+        plt.hlines(0.998, xmin, xmax, label='GAT', linestyles='dashed', colors='red')
+    elif metric == 'AUPRC':
+        plt.hlines(0.968, xmin, xmax, label='SimVec', colors='green')
+        plt.hlines(0.953, xmin, xmax, label='NNPS', colors='blue')
+        plt.hlines(0.998, xmin, xmax, label='GAT', linestyles='dashed', colors='red')
+
     plt.xlim(xmin, xmax)
     plt.ylim(ymin, ymax)
     plt.legend()
