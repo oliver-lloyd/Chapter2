@@ -66,7 +66,7 @@ for metric in results.columns[1:4]:
     plt.title(f'{metric} by model and dataset')
     plt.ylabel(name_format[metric])
     plt.xlabel('Model')
-    plt.savefig(f'{metric}.png')
+    plt.savefig(f'figures/{metric}.png')
     plt.clf()
 
 # Load runtime data
@@ -88,5 +88,5 @@ plt.legend(title="Dataset")
 plt.title('Per Epoch Running Time')
 plt.ylabel('Seconds/Epoch')
 plt.xlabel('Model')
-plt.savefig('runtime_per_epoch.png')
+plt.savefig('figures/runtime_per_epoch.png')
 plt.clf()
