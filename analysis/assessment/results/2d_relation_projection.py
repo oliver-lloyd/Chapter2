@@ -94,7 +94,7 @@ plot_df['group'] = target_group
 plt.clf()
 first_layer = plot_df.loc[pd.isna(plot_df.group)]
 second_layer = plot_df.loc[pd.notna(plot_df.group)]
-sns.scatterplot(first_layer, x=0, y=1, color='grey')
+sns.scatterplot(first_layer, x=0, y=1, color='grey', alpha=0.5)
 sns.scatterplot(second_layer, x=0, y=1, hue='group')
 plt.legend(title='Co-occuring with:')
 plt.xticks([])
