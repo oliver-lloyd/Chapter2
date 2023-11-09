@@ -3,7 +3,7 @@ import numpy as np
 import torch
 import decagon_rank_metrics
 import argparse
-from os import listdir
+from os import listdir, system
 from kge.model import KgeModel
 from kge.util.io import load_checkpoint
 from sklearn.metrics import roc_auc_score, average_precision_score
@@ -13,7 +13,6 @@ from sklearn.metrics import roc_auc_score, average_precision_score
 parser = argparse.ArgumentParser()
 parser.add_argument('model_checkpoint')
 parser.add_argument('out_dir')
-parser.add_argument('libkge_data_dir')
 parser.add_argument('--partial_results')
 args = parser.parse_args()
 
@@ -29,14 +28,15 @@ if model_name == 'reciprocal_relations_model':
         )['base_model']['type']
 
 # Load entity and relation keys
+libkge_data_dir = checkpoint['config'].get('dataset.name')
 relation_ids = pd.read_csv(
-    f'{args.libkge_data_dir}/relation_ids.del',
+    f'{libkge_data_dir}/relation_ids.del',
     sep='\t',
     header=None,
     index_col=0
 ).to_dict()[1]
 entity_ids = pd.read_csv(
-    f'{args.libkge_data_dir}/entity_ids.del',
+    f'{libkge_data_dir}/entity_ids.del',
     sep='\t',
     header=None,
     index_col=0
@@ -130,3 +130,4 @@ for rel_id, subdf in holdout.groupby(1):
         print(f'Result found for relation: {relation}. Skipping..')
 
 results.to_csv(f'{args.out_dir}/results_full.csv', index=False)
+system('rm results_temp.csv')
