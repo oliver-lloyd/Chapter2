@@ -19,11 +19,12 @@ name_format = {
 # Load result data
 results = pd.DataFrame()
 for loc in listdir():
-    if '.' not in loc:
+    if loc.startswith('2023'):
         df = pd.read_csv(f'{loc}/results_full.csv')
-        components = loc.split('_')
-        df['model'] = name_format[components[0]]
-        df['dataset'] = name_format[components[1]]
+        name = loc[16:]
+        model, dataset = name.split('_')
+        df['model'] = model
+        df['dataset'] = dataset
         results = results.append(df)
 
 # Remove untrained model scores if not desired
@@ -45,20 +46,22 @@ decagon_scores = {
 }
 
 # Draw performance results
+plot_other_scores = False
 for metric in results.columns[1:4]:
     sns.boxplot(x='model', y=metric, hue='dataset', data=results)
     plt.hlines(
         decagon_scores[metric], xmin, xmax,
         label='Decagon', colors='black'
     )
-    if metric == 'AUROC':
-        plt.hlines(0.975, xmin, xmax, label='SimVec', colors='green')
-        plt.hlines(0.966, xmin, xmax, label='NNPS', colors='blue')
-        plt.hlines(0.998, xmin, xmax, label='GAT', linestyles='dashed', colors='red')
-    elif metric == 'AUPRC':
-        plt.hlines(0.968, xmin, xmax, label='SimVec', colors='green')
-        plt.hlines(0.953, xmin, xmax, label='NNPS', colors='blue')
-        plt.hlines(0.998, xmin, xmax, label='GAT', linestyles='dashed', colors='red')
+    if plot_other_scores:
+        if metric == 'AUROC':
+            plt.hlines(0.998, xmin, xmax, label='Carletti\'s', linestyles='dashed', colors='red')
+            plt.hlines(0.99, xmin, xmax, label='DSN-DDI', colors='green')
+            plt.hlines(0.98, xmin, xmax, label='ADGCL', colors='blue')
+        elif metric == 'AUPRC':
+            plt.hlines(0.998, xmin, xmax, label='Carletti\'s', linestyles='dashed', colors='red')
+            plt.hlines(0.983, xmin, xmax, label='MS-ADR', colors='green')
+            plt.hlines(0.98, xmin, xmax, label='ADGCL', colors='blue')
 
     plt.xlim(xmin, xmax)
     plt.ylim(0.5 if metric == "AP@50" else ymin, ymax)
