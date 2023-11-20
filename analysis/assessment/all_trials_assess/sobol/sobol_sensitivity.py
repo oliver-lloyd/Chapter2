@@ -52,6 +52,7 @@ def argmax_dummies(row):
             else:
                 row[dummy] = 1
 
+
 param_values_df = pd.DataFrame(param_values, columns=X.columns)
 param_values_df.apply(argmax_dummies, axis=1)  # Will take some time (~5mins) to run
 
@@ -65,5 +66,10 @@ param_values = param_values_df.to_numpy()
 preds = model.predict(param_values)
 
 # Get sensitivity indices
-auprc = np.array([pred[1] for pred in preds]
-Si = sobol.analyze(problem, preds)
+auprc = [pred[1] for pred in preds]
+Si = sobol.analyze(problem, np.array(auprc))
+
+# Save
+pd.DataFrame(zip(X.columns, Si['S1']), columns=['input', 'sensitivity']).to_csv('indices/first_order.csv', index=False)
+pd.DataFrame(Si['S2'], columns=X.columns, index=X.columns).to_csv('indices/second_order.csv')
+pd.DataFrame(zip(X.columns, Si['ST']), columns=['input', 'sensitivity']).to_csv('indices/total_order.csv', index=False)
