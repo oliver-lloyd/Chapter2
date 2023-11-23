@@ -22,7 +22,7 @@ if __name__ == '__main__':
     edgelist.columns = ['head', 'relation', 'tail']  # col names for script readability
 
     # Prepare/load output dataframe
-    outfile = 'dettmers_proportions_test.csv'
+    outfile = 'dettmers_proportions.csv'
     cols = ['relation1', 'relation2', 'inverse_proportion']
     if outfile in listdir():
         out_df = pd.read_csv(outfile)
